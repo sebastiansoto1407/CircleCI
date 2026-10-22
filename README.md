@@ -44,19 +44,19 @@ Un trabajo en verde significa que terminó bien. Si `probar` falla, `desplegar` 
 
 ## Crear un cambio correcto
 
-El script `demo:success` modifica el texto de la calculadora de línea de comandos. Revisa el cambio antes de publicarlo:
+El script `demo:success` modifica un subtítulo visible de la tienda web. Revisa el cambio antes de publicarlo:
 
 ```powershell
 npm run demo:success
 git diff
 npm run build
 npm test
-git add src/cli.js
+git add public/index.html
 git commit -m "Mostrar cambio correcto en CircleCI"
 git push origin main
 ```
 
-Al abrir el nuevo pipeline en CircleCI, los tres trabajos deben quedar **Success**. Si el script dice que no cambió nada, ya se usó una vez; puedes editar otro texto visible de `src/cli.js` y hacer el commit.
+Al abrir el nuevo pipeline en CircleCI, los tres trabajos deben quedar **Success**. Reinicia `npm run web` y recarga la página local para ver el nuevo subtítulo. Si el script dice que no cambió nada, ya se usó una vez; puedes editar otro texto visible de `public/index.html` y hacer el commit.
 
 ## Demostrar que una prueba detiene el pipeline
 

@@ -1,26 +1,36 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const path = 'src/calculadora.js';
-const cliPath = 'src/cli.js';
-const correct = '  return a + b;';
-const broken = '  return a - b;';
-const mode = process.argv[2];
-const before = readFileSync(path, 'utf8');
-const cliBefore = readFileSync(cliPath, 'utf8');
-const originalOutput = 'console.log(`${a} + ${b} = ${sumar(a, b)}`);';
-const improvedOutput = 'console.log(`Resultado: ${a} + ${b} = ${sumar(a, b)}`);';
+const calculadora = 'src/calculadora.js';
+const pagina = 'public/index.html';
+const sumaCorrecta = '  return a + b;';
+const sumaIncorrecta = '  return a - b;';
+const textoOriginal = 'Agrega productos, aplica un cupón y revisa cómo se calcula el total.';
+const textoNuevo = 'Agrega productos, aplica un cupón y observa el total al instante.';
+const modo = process.argv[2];
 
-if (mode === 'success' && cliBefore.includes(originalOutput)) {
-  writeFileSync(cliPath, cliBefore.replace(originalOutput, improvedOutput));
-  console.log('Cambio correcto: la CLI muestra una etiqueta antes del resultado.');
-} else if (mode === 'fail' && before.includes(correct)) {
-  writeFileSync(path, before.replace(correct, broken));
-  console.log('Fallo introducido: sumar ahora resta. Revisa git diff antes de publicar.');
-} else if (mode === 'fix' && before.includes(broken)) {
-  writeFileSync(path, before.replace(broken, correct));
-  console.log('Función corregida: sumar vuelve a sumar.');
+if (modo === 'success') {
+  const contenido = readFileSync(pagina, 'utf8');
+  if (!contenido.includes(textoOriginal)) {
+    console.error('El cambio correcto ya se aplicó o el texto de la página cambió.');
+    process.exitCode = 1;
+  } else {
+    writeFileSync(pagina, contenido.replace(textoOriginal, textoNuevo));
+    console.log('Cambio correcto: la página muestra un nuevo subtítulo.');
+  }
+} else if (modo === 'fail' || modo === 'fix') {
+  const contenido = readFileSync(calculadora, 'utf8');
+  const anterior = modo === 'fail' ? sumaCorrecta : sumaIncorrecta;
+  const siguiente = modo === 'fail' ? sumaIncorrecta : sumaCorrecta;
+  if (!contenido.includes(anterior)) {
+    console.error(`No se hizo ningún cambio: estado inesperado para ${modo}.`);
+    process.exitCode = 1;
+  } else {
+    writeFileSync(calculadora, contenido.replace(anterior, siguiente));
+    console.log(modo === 'fail'
+      ? 'Fallo introducido: sumar ahora resta. Revisa git diff antes de publicar.'
+      : 'Función corregida: sumar vuelve a sumar.');
+  }
 } else {
-  console.error(`No se hizo ningún cambio. Estado o modo inesperado: ${mode ?? '(vacío)'}`);
+  console.error('Uso: npm run demo:success, demo:fail o demo:fix');
   process.exitCode = 1;
 }
-
