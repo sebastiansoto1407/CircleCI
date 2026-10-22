@@ -40,15 +40,17 @@ La interfaz exacta cambia entre organizaciones creadas con GitHub OAuth y las cr
 
 ## Ensayo de la demostración en vivo
 
-Comprueba primero que `git status --short` no muestre cambios. Para producir un pipeline correcto tras conectar CircleCI, modifica una línea del README y publica:
+Comprueba primero que `git status --short` no muestre cambios. Para producir un pipeline correcto tras conectar CircleCI, modifica la salida de la aplicación JavaScript y publica:
 
 ```powershell
-git add README.md
+npm run demo:success
+git diff -- src/cli.js
+git add src/cli.js
 git commit -m "Ensayar pipeline correcto"
 git push origin main
 ```
 
-En **Pipelines**, espera el resultado del commit. Deben verse `compilar: Success`, `probar: Success` y `desplegar: Success`. En el trabajo `probar`, la pestaña **Tests** debe mostrar 4 pruebas aprobadas. El trabajo `desplegar` imprime `2 + 3 = 5` y el aviso de simulación.
+El script cambia el texto de salida de `src/cli.js` para agregar la etiqueta `Resultado:`. En **Pipelines**, espera el resultado del commit. Deben verse `compilar: Success`, `probar: Success` y `desplegar: Success`. En el trabajo `probar`, la pestaña **Tests** debe mostrar 4 pruebas aprobadas. El trabajo `desplegar` imprime `Resultado: 2 + 3 = 5` y el aviso de simulación.
 
 Para simular un error real de código:
 

@@ -8,6 +8,7 @@
     "test": "node --test tests/calculadora.test.cjs",
     "test:ci": "node scripts/test-ci.mjs",
     "start": "node dist/cli.js 2 3",
+    "demo:success": "node scripts/demo.mjs success",
     "demo:fail": "node scripts/demo.mjs fail",
     "demo:fix": "node scripts/demo.mjs fix"
   },
