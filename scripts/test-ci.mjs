@@ -3,7 +3,6 @@ import { spawnSync } from 'node:child_process';
 
 mkdirSync('reports', { recursive: true });
 const rawPath = '.node-junit.tmp.xml';
-
 const result = spawnSync(process.execPath, [
   '--test',
   '--test-reporter=spec',
@@ -11,6 +10,8 @@ const result = spawnSync(process.execPath, [
   '--test-reporter=junit',
   `--test-reporter-destination=${rawPath}`,
   'tests/calculadora.test.cjs',
+  'tests/tienda.test.cjs',
+  'tests/api.test.cjs',
 ], { stdio: 'inherit' });
 
 // Node genera testcases directamente bajo testsuites. CircleCI espera una suite.
@@ -21,7 +22,7 @@ try {
   const report = raw.includes('<testsuite ')
     ? raw
     : raw
-        .replace('<testsuites>', `<testsuites tests="${tests}" failures="${failures}">\n<testsuite name="calculadora" tests="${tests}" failures="${failures}" file="tests/calculadora.test.cjs">`)
+        .replace('<testsuites>', `<testsuites tests="${tests}" failures="${failures}">\n<testsuite name="mini-tienda" tests="${tests}" failures="${failures}" file="tests">`)
         .replace('</testsuites>', '</testsuite>\n</testsuites>');
   writeFileSync('reports/junit.xml', report);
   unlinkSync(rawPath);
@@ -36,4 +37,3 @@ if (result.error) {
 } else if (process.exitCode !== 1) {
   process.exitCode = result.status ?? 1;
 }
-

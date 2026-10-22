@@ -30,7 +30,7 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run:
-          name: Ejecutar pruebas unitarias y crear JUnit XML
+          name: Ejecutar pruebas y crear JUnit XML
           command: npm run test:ci
       - store_test_results:
           path: reports
@@ -44,8 +44,9 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run:
-          name: Despliegue simulado
+          name: Verificar aplicación compilada (despliegue simulado)
           command: |
+            npm run smoke
             node dist/cli.js 2 3
             echo "Despliegue simulado completado. No se publica en Internet."
 
@@ -59,4 +60,3 @@ workflows:
       - desplegar:
           requires:
             - probar
-

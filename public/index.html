@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mini tienda | CircleCI</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="contenedor">
+      <p class="etiqueta">PROYECTO JAVASCRIPT · CI/CD</p>
+      <h1>Mini tienda</h1>
+      <p>Agrega productos, aplica un cupón y revisa cómo se calcula el total.</p>
+    </div>
+  </header>
+  <main class="contenedor columnas">
+    <section aria-labelledby="titulo-productos">
+      <div class="encabezado">
+        <div>
+          <p class="etiqueta oscura">01 / CATÁLOGO</p>
+          <h2 id="titulo-productos">Productos</h2>
+        </div>
+        <span class="pildora">4 productos</span>
+      </div>
+      <div id="productos" class="productos" aria-live="polite"></div>
+    </section>
+    <aside class="carrito" aria-labelledby="titulo-carrito">
+      <p class="etiqueta oscura">02 / PEDIDO</p>
+      <h2 id="titulo-carrito">Tu carrito</h2>
+      <div id="items" class="items"></div>
+      <form id="form-cupon" class="cupon">
+        <label for="codigo">Cupón de descuento</label>
+        <div class="fila">
+          <input id="codigo" name="codigo" placeholder="AHORRA10" autocomplete="off">
+          <button type="submit">Aplicar</button>
+        </div>
+        <small>Prueba el código <strong>AHORRA10</strong> para obtener 10%.</small>
+      </form>
+      <dl class="resumen">
+        <div><dt>Subtotal</dt><dd id="subtotal">Bs 0,00</dd></div>
+        <div><dt>Descuento</dt><dd id="descuento">Bs 0,00</dd></div>
+        <div><dt>Envío</dt><dd id="envio">Bs 0,00</dd></div>
+        <div class="total"><dt>Total</dt><dd id="total">Bs 0,00</dd></div>
+      </dl>
+      <p class="nota">Envío gratis desde Bs 100 de subtotal. Los datos se reinician al cerrar el servidor.</p>
+      <button id="vaciar" class="secundario" type="button">Vaciar carrito</button>
+    </aside>
+  </main>
+  <div id="mensaje" class="mensaje" role="status" aria-live="polite"></div>
+</body>
+</html>

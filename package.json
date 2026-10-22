@@ -2,12 +2,14 @@
   "name": "circleci-demo-javascript",
   "version": "1.0.0",
   "private": true,
-  "description": "Demostración académica de CI/CD con CircleCI y JavaScript",
+  "description": "Mini tienda en JavaScript con pruebas y pipeline CircleCI",
   "scripts": {
-    "build": "esbuild src/calculadora.js src/cli.js --bundle --platform=node --format=cjs --outdir=dist",
-    "test": "node --test tests/calculadora.test.cjs",
+    "build": "esbuild src/calculadora.js src/cli.js src/tienda.js src/server.js src/start.js --bundle --platform=node --format=cjs --outdir=dist",
+    "test": "node --test tests/calculadora.test.cjs tests/tienda.test.cjs tests/api.test.cjs",
     "test:ci": "node scripts/test-ci.mjs",
     "start": "node dist/cli.js 2 3",
+    "web": "node dist/start.js",
+    "smoke": "node scripts/smoke.mjs",
     "demo:success": "node scripts/demo.mjs success",
     "demo:fail": "node scripts/demo.mjs fail",
     "demo:fix": "node scripts/demo.mjs fix"
@@ -19,4 +21,3 @@
     "node": ">=20"
   }
 }
-

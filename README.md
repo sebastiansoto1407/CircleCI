@@ -1,58 +1,66 @@
-# Demostración de CI/CD con CircleCI y JavaScript
+# Mini tienda con CircleCI
 
-Proyecto académico para mostrar un pipeline real: **compilar → probar → desplegar (simulación)**. La aplicación es una calculadora de línea de comandos. `esbuild` empaqueta el código JavaScript; el ejecutor de pruebas integrado en Node.js genera un reporte JUnit XML que CircleCI muestra en la pestaña **Tests**. La última etapa solo imprime un resultado, no publica software en Internet.
+Proyecto JavaScript para aprender CI/CD con una aplicación visible en el navegador. La tienda permite agregar y quitar cuatro productos, aplicar el cupón `AHORRA10`, calcular el envío y ver el total. Los datos viven en memoria mientras el servidor está abierto. No hay pagos ni base de datos.
 
-## Estructura
+El pipeline ejecuta tres trabajos en orden: **compilar → probar → desplegar (simulado)**. El último trabajo comprueba que la API y la página abran; no publica el sitio en Internet.
 
-```text
-.circleci/config.yml          Pipeline de CircleCI
-src/calculadora.js            Funciones que se prueban
-src/cli.js                    Aplicación de línea de comandos
-tests/calculadora.test.cjs    Cuatro pruebas unitarias
-scripts/test-ci.mjs           Pruebas + reporte JUnit
-scripts/demo.mjs              Introduce y corrige el fallo de la exposición
-package-lock.json            Versiones exactas para npm ci
-```
+## Reparto sencillo para cuatro integrantes
 
-## Comprobar el proyecto en tu computadora
+| Integrante | Parte | Archivo principal | Qué puede mostrar |
+|---|---|---|---|
+| 1 | Interfaz | `public/index.html`, `public/style.css`, `public/app.js` | Agregar productos y ver el carrito en pantalla |
+| 2 | Reglas de la tienda | `src/tienda.js`, `src/calculadora.js` | Subtotal, cupón, envío y total |
+| 3 | Servidor y API | `src/server.js`, `src/start.js` | Rutas `/api/productos`, `/api/carrito`, `/api/health` |
+| 4 | Pruebas y CircleCI | `tests/`, `.circleci/config.yml` | Pipeline verde, fallo y despliegue bloqueado |
 
-Abre PowerShell en `C:\Users\hp\Documents\visualcode\circleCI` y ejecuta:
+## Ejecutar en tu computadora
+
+En PowerShell:
 
 ```powershell
+cd C:\Users\hp\Documents\visualcode\circleCI
 npm ci
 npm run build
 npm test
-npm run test:ci
-npm start
+npm run smoke
+npm run web
 ```
 
-Resultado esperado: `npm run build` crea `dist/`, `npm test` indica **4 tests, 4 pass, 0 fail**, `npm run test:ci` crea `reports/junit.xml`, y `npm start` imprime `2 + 3 = 5`. Las carpetas `dist/` y `reports/` no se suben a GitHub.
+Abre **http://localhost:3000** en un navegador. La terminal debe mostrar `Tienda lista en http://localhost:3000`. En la página, agrega un cuaderno, aplica `AHORRA10` y observa los importes. Detén el servidor con **Ctrl+C**. `npm test` debe terminar con **15 pruebas aprobadas y 0 fallidas**. `npm run smoke` debe imprimir `Smoke test: API y página web funcionan.`
 
-## Activar CircleCI una sola vez
+Si el puerto 3000 está ocupado, usa `$env:PORT=3001; npm run web` y abre `http://localhost:3001`.
 
-1. Entra a [CircleCI](https://app.circleci.com/) con tu cuenta y conecta GitHub si te lo pide.
-2. En **Home**, usa **Create Project** o **Set Up Project** según el tipo de organización que muestre tu cuenta.
-3. Selecciona el repositorio `sebastiansoto1407/CircleCI` y la rama `main`.
-4. Elige el archivo de configuración existente `.circleci/config.yml`. Si el asistente te pide crear un pipeline y un trigger, selecciona GitHub como origen y el trigger de **push** para la rama `main` o todas las ramas. No reemplaces el archivo existente por una plantilla.
-5. Abre **Pipelines** y comprueba que aparezca el workflow `demostracion`.
+## Qué mirar en CircleCI
 
-La interfaz exacta cambia entre organizaciones creadas con GitHub OAuth y las creadas con la integración nueva de GitHub. Si el proyecto no aparece, comprueba que CircleCI tenga permiso sobre ese repositorio y que el pipeline tenga un trigger de push. [Guía oficial de creación de proyectos](https://circleci.com/docs/guides/getting-started/create-project/).
+El repositorio ya está conectado: [Pipelines de CircleCI](https://app.circleci.com/pipelines/github/sebastiansoto1407/CircleCI). Cada `git push` a `main` inicia una ejecución nueva.
 
-## Ensayo de la demostración en vivo
+1. Abre **Pipelines** y entra al número de la ejecución más reciente.
+2. En el workflow **demostracion**, verás `compilar`, `probar` y `desplegar` conectados en ese orden.
+3. Abre **compilar**: en los pasos verás `npm ci` y `npm run build`; en **Artifacts**, los archivos de `dist/`.
+4. Abre **probar**: en la salida verás las pruebas; en **Tests**, los resultados; en **Artifacts**, `reports/junit.xml`.
+5. Abre **desplegar**: la salida debe decir `Smoke test: API y página web funcionan.` y `Despliegue simulado completado...`.
 
-Comprueba primero que `git status --short` no muestre cambios. Para producir un pipeline correcto tras conectar CircleCI, modifica la salida de la aplicación JavaScript y publica:
+Un trabajo en verde significa que terminó bien. Si `probar` falla, `desplegar` queda sin ejecutar porque `requires` exige que la prueba termine correctamente.
+
+## Crear un cambio correcto
+
+El script `demo:success` modifica el texto de la calculadora de línea de comandos. Revisa el cambio antes de publicarlo:
 
 ```powershell
 npm run demo:success
-git diff -- src/cli.js
+git diff
+npm run build
+npm test
 git add src/cli.js
-git commit -m "Ensayar pipeline correcto"
+git commit -m "Mostrar cambio correcto en CircleCI"
 git push origin main
 ```
 
-El script cambia el texto de salida de `src/cli.js` para agregar la etiqueta `Resultado:`. En **Pipelines**, espera el resultado del commit. Deben verse `compilar: Success`, `probar: Success` y `desplegar: Success`. En el trabajo `probar`, la pestaña **Tests** debe mostrar 4 pruebas aprobadas. El trabajo `desplegar` imprime `Resultado: 2 + 3 = 5` y el aviso de simulación.
+Al abrir el nuevo pipeline en CircleCI, los tres trabajos deben quedar **Success**. Si el script dice que no cambió nada, ya se usó una vez; puedes editar otro texto visible de `src/cli.js` y hacer el commit.
 
-Para simular un error real de código:
+## Demostrar que una prueba detiene el pipeline
+
+Hazlo solo cuando quieras mostrar el fallo. Esto crea un commit incorrecto a propósito; luego hay que corregirlo.
 
 ```powershell
 npm run demo:fail
@@ -62,46 +70,32 @@ git commit -m "Demostrar fallo de pruebas"
 git push origin main
 ```
 
-El script cambia `return a + b;` por `return a - b;`. En el nuevo pipeline, `compilar` debe tener **Success**, `probar` debe tener **Failed** y `desplegar` debe quedar **Not run / Blocked**. La pestaña **Tests** mostrará los casos fallidos y `reports/junit.xml` quedará guardado como artefacto. No hagas un `rerun` del mismo commit para corregirlo: se necesita un nuevo commit.
-
-Restaura el funcionamiento:
+En CircleCI, `compilar` debe quedar **Success**, `probar` **Failed** y `desplegar` sin ejecutar. Al abrir `probar`, verás qué prueba esperaba un total y recibió otro. Para recuperar el proyecto:
 
 ```powershell
 npm run demo:fix
 npm run build
 npm test
 git add src/calculadora.js
-git commit -m "Corregir suma y recuperar pipeline"
+git commit -m "Corregir cálculo y recuperar pipeline"
 git push origin main
 ```
 
-La última ejecución debe volver a mostrar los tres trabajos en **Success**. Si `git push` pide autenticación, completa el inicio de sesión de GitHub en el navegador. Si indica que no hay cambios, revisa `git status` y el historial con `git log -3 --oneline`.
+El siguiente pipeline debe volver a tener tres trabajos verdes. No uses **Rerun** sobre el commit fallido para arreglar el código: ese botón repite el mismo código. Necesitas un commit nuevo.
 
-## Qué hace cada trabajo
+## Estructura importante
 
-| Trabajo | Entrada y acción | Salida |
-|---|---|---|
-| `compilar` | `npm ci` y `npm run build` en `cimg/node:24.10.0` | `dist/` en el workspace y como artefacto |
-| `probar` | Recibe `dist/`, ejecuta cuatro pruebas | JUnit XML, vista Tests y estado correcto o fallido |
-| `desplegar` | Solo se inicia cuando `probar` termina correctamente | Ejecución de ejemplo y mensaje de simulación |
+```text
+.circleci/config.yml       Trabajos y orden del pipeline
+src/calculadora.js         Operaciones usadas en el total
+src/tienda.js              Catálogo, carrito y reglas de precios
+src/server.js              API y archivos de la página
+src/start.js               Arranque del servidor
+public/                    Interfaz web
+tests/                     Pruebas de cálculo, tienda y API
+scripts/test-ci.mjs        Reporte JUnit para CircleCI
+scripts/smoke.mjs          Comprobación rápida de la aplicación
+scripts/demo.mjs           Cambios de ejemplo para pasar/fallar
+```
 
-`requires` en `.circleci/config.yml` establece el orden. Cada trabajo usa un contenedor Docker aislado, por lo que `persist_to_workspace` y `attach_workspace` transfieren `dist/` entre trabajos. `store_test_results` publica el XML aun si las pruebas fallan.
-
-## Solución de problemas
-
-| Síntoma | Comprobación |
-|---|---|
-| No aparece pipeline tras el push | Revisa permiso de GitHub, trigger de push, rama `main` y ruta `.circleci/config.yml`. |
-| `npm ci` falla | Confirma que `package-lock.json` esté publicado junto con `package.json`. |
-| El trabajo `probar` no encuentra `dist/` | Comprueba que `compilar` termine y que workspace esté adjuntado. |
-| Tests no aparecen en CircleCI | Comprueba `reports/junit.xml` en artefactos y la ruta `store_test_results: reports`. |
-| El despliegue no corre | Abre `probar`: si falló, CircleCI lo bloqueó como estaba previsto. |
-
-## Fuentes técnicas
-
-- [Creación de proyectos y triggers](https://circleci.com/docs/guides/getting-started/create-project/)
-- [Referencia de configuración](https://circleci.com/docs/reference/configuration-reference/)
-- [Workflows y dependencias](https://circleci.com/docs/guides/orchestrate/workflows/)
-- [Publicación de resultados de pruebas](https://circleci.com/docs/guides/test/collect-test-data/)
-- [Imagen Docker de Node.js](https://circleci.com/developer/images/image/cimg/node)
-
+`dist/` y `reports/` son archivos generados, ignorados por Git. CircleCI recibe `dist/` mediante un workspace y guarda el resultado XML como artefacto y dato de la pestaña **Tests**.
