@@ -1,0 +1,62 @@
+version: 2.1
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:24.10.0
+
+jobs:
+  compilar:
+    executor: node
+    steps:
+      - checkout
+      - run:
+          name: Instalar dependencias reproducibles
+          command: npm ci
+      - run:
+          name: Empaquetar JavaScript
+          command: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+      - store_artifacts:
+          path: dist
+
+  probar:
+    executor: node
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Ejecutar pruebas unitarias y crear JUnit XML
+          command: npm run test:ci
+      - store_test_results:
+          path: reports
+      - store_artifacts:
+          path: reports
+
+  desplegar:
+    executor: node
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Despliegue simulado
+          command: |
+            node dist/cli.js 2 3
+            echo "Despliegue simulado completado. No se publica en Internet."
+
+workflows:
+  demostracion:
+    jobs:
+      - compilar
+      - probar:
+          requires:
+            - compilar
+      - desplegar:
+          requires:
+            - probar
+
