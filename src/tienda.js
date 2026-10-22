@@ -14,7 +14,7 @@ export function calcularResumen(items, cupon = '') {
     (acumulado, item) => sumar(acumulado, redondear(item.precio * item.cantidad)), 0,
   ));
   const descuento = cupon === 'AHORRA10' ? redondear(subtotal * 0.1) : 0;
-  const envio = subtotal === 0 || subtotal >= 100 ? 0 : 10;
+  const envio = subtotal === 0 || subtotal >= 1000 ? 0 : 10;
   const total = redondear(sumar(restar(subtotal, descuento), envio));
   return { subtotal, descuento, envio, total };
 }
