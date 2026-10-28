@@ -59,7 +59,7 @@ async function iniciar() {
   const productos = await solicitar('/api/productos');
   const contenedor = $('#productos');
   const descripciones = {
-    cuaderno: 'Para apuntes, ideas y ejercicios.',
+    cuaderno: 'Para apuntes, tareas, ideas y ejercicios.',
     lapices: 'Un toque de color para cada proyecto.',
     mochila: 'Lleva todo lo necesario a clase.',
     botella: 'Agua fresca durante el día.',
