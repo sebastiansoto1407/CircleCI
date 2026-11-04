@@ -61,7 +61,7 @@ export function crearCarrito() {
   }
 
   function vaciar() {
-    cantidades.clear;
+    cantidades.clear();
     cupon = '';
     return ver();
   }
